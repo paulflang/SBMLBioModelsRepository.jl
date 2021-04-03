@@ -83,7 +83,7 @@ there's got to be a better way to access the test-suite
 did anyone even intend for people to use this?
 """
 function sbml_test_suite(dir="data/sbml_test_suite_models/")
-    !isdir(dir) && mkdir(dir)
+    !ispath(dir) && mkpath(dir)
     repo_p = "data/sbml-test-suite/"
     run(`git clone "https://github.com/sbmlteam/sbml-test-suite/" $(repo_p)`)
     p = "data/sbmlcases/semantic/"
