@@ -1,6 +1,6 @@
 module SBMLBioModelsRepository
 # this is used to download the data from biomd
-using CSV, DataFrames, JSON3, JSONTables  #  , InfoZIP i guess zip files stuff is just bad 
+using CSV, DataFrames, JSON3, JSONTables, Glob  #  , InfoZIP i guess zip files stuff is just bad 
 using Base.Threads
 
 function curl_biomd_metadata(meta_dir="data/biomd_meta")
@@ -82,16 +82,17 @@ the total size of the SBML is like 5 MB
 there's got to be a better way to access the test-suite
 did anyone even intend for people to use this?
 """
-function sbml_test_suite(dir="data/sbml_test_suite_models/")
-    !isdir(dir) && mkdir(dir)
-    repo_p = "data/sbml-test-suite/"
-    run(`git clone "https://github.com/sbmlteam/sbml-test-suite/" $(repo_p)`)
-    p = "data/sbmlcases/semantic/"
-    ds = filter(isdir, readdir(p; join=true))
+function sbml_test_suite(dir=joinpath("data","sbml_test_suite_models"))
+    repo_p = joinpath("data","sbml-test-suite")
+    !isdir(dir) && begin mkpath(dir)   
+        run(`git clone https://github.com/sbmlteam/sbml-test-suite.git $(repo_p)`)
+    end
+    p = joinpath("cases","semantic")
+    ds = filter(isdir, readdir(joinpath(repo_p,p); join=true))
     fns = reduce(vcat, glob.("*.xml", ds))
     fs = map(x -> splitdir(x)[end], fns)
     dsts = normpath.(dir .* fs)
-    cp.(fns, dsts)
+    cp.(fns, dsts, force=true)
     rm(repo_p; recursive=true)
     readdir(dir; join=true)
 end
