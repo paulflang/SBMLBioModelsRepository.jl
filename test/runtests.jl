@@ -1,6 +1,7 @@
 using SBMLBioModelsRepository
+using CSV, DataFrames, Glob
 using Test
 
 @testset "SBMLBioModelsRepository.jl" begin
-    # Write your tests here.
+    @testset "data" begin include("data.jl") end
 end

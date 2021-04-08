@@ -1,9 +1,12 @@
+"""this is used to download the data from biomd and the sbml-test-suite"""
 module SBMLBioModelsRepository
-# this is used to download the data from biomd
-using CSV, DataFrames, JSON3, JSONTables  #  , InfoZIP i guess zip files stuff is just bad 
+
+const datadir = joinpath(@__DIR__, "../data")
+
+using CSV, DataFrames, JSON3, JSONTables, Glob
 using Base.Threads
 
-function curl_biomd_metadata(meta_dir="data/biomd_meta")
+function curl_biomd_metadata(meta_dir="$(datadir)/biomd_meta")
     !ispath(meta_dir) && mkpath(meta_dir)
     offsets = 0:100:2200
     urls = "https://www.ebi.ac.uk/biomodels/search?query=sbml&offset=" .* string.(offsets) .* "&numResults=100&format=json"
@@ -18,14 +21,14 @@ function jsonfn_to_df(fn)
     DataFrame(jsontable(json.models))
 end
 
-function biomd_sbml_metadata(meta_dir="data/biomd_meta")
+function biomd_metadata(meta_dir="$(datadir)/biomd_meta")
     fns = readdir(meta_dir; join=true)
     dfs = jsonfn_to_df.(fns)
     vcat(dfs...)
 end
 
 "uses the BioModels IDs and the download REST API"
-function sbml_zip_urls(df)
+function biomd_zip_urls(df)
     base = "https://www.ebi.ac.uk/biomodels/search/download?models="
     ids = df.id
     N = 100 # api limits 100 at a time
@@ -36,69 +39,75 @@ function sbml_zip_urls(df)
 end
 
 """
-takes the metadata dataframe from `biomd_sbml_metadata()`.
+takes the metadata dataframe from `biomd_metadata()`.
 
 should probably do this async
 """
-function curl_sbml_zips(urls, zips_dir="data/biomd_zips/")
-    @sync Threads.@threads for i in 1:length(urls)
+function curl_biomd_zips(urls, zips_dir="$(datadir)/biomd_zips/")
+    for i in 1:length(urls) # @threads seems to not work
         run(`curl -X GET "$(urls[i])" -H "accept: application/zip" -o $(zips_dir)$i.zip`)
     end 
     return urls
 end
 
-# """
-# unzips all the zip files to a dir.
+"needs unzip in shell path"
+function unzip_biomd(zips_dir, unzip_dir)
+    mkpath(unzip_dir)
+    zips = readdir(zips_dir; join=true)
+    for fn in zips
+        run(`unzip  $fn -d $(unzip_dir)`) 
+    end
+    unzip_dir
+end
 
-# todo test that this doesn't overwrite it better not i swear to gosh
-# """
-# function unzip_sbml(zips_dir, unzip_dir)
-#     mkpath(unzip_dir)
-#     InfoZIP.unzip.(readdir(zips_dir; join=true), unzip_dir)
-#     unzip_dir
-# end
+"dir is where all the models are put"
+function biomodels(
+    meta_dir="$(datadir)/biomd_meta",
+    zips_dir="$(datadir)/biomd_zips/",
+    unzip_dir="$(datadir)/biomd/";
+    curl_meta=false)
 
-"dir is where all the models are put. doesn't "
-function biomodels(meta_dir="data/biomd_meta", zips_dir="data/biomd_zips/", sbmls_dir="data/biomd/"; curl_meta=false)
     mkpath.([meta_dir,
         zips_dir,
-        sbmls_dir])
+        unzip_dir])
         
     curl_meta && curl_biomd_metadata(meta_dir)
-    df = biomd_sbml_metadata(meta_dir)
+    df = biomd_metadata(meta_dir)
     CSV.write("data/sbml_biomodels.csv", df)
-    urls = sbml_zip_urls(df)
-    curl_sbml_zips(urls, zips_dir)
-    # manually extract them 
-    # unzip_sbml(zips_dir, sbmls_dir)
-    # readdir(sbmls_dir; join=true)
+    urls = biomd_zip_urls(df)
+    curl_biomd_zips(urls, zips_dir)
+    unzip_biomd(zips_dir, unzip_dir)
 end
 
 """
-requires git.
+requires git
 
-this is also a fat download: 391.56 MB. 
-the total size of the SBML is like 5 MB 
-there's got to be a better way to access the test-suite
-did anyone even intend for people to use this?
+returns location of all the models (every version), and the
+
+for a particular version just do 
+
+    `filter(x->occursin("l1v2", x), fns)`
 """
-function sbml_test_suite(dir="data/sbml_test_suite_models/")
-    !ispath(dir) && mkpath(dir)
-    repo_p = "data/sbml-test-suite/"
-    run(`git clone "https://github.com/sbmlteam/sbml-test-suite/" $(repo_p)`)
-    p = "data/sbmlcases/semantic/"
-    ds = filter(isdir, readdir(p; join=true))
+function sbml_test_suite(repo_path = "$(datadir)/sbml-test-suite/")
+    # !ispath(dir) && mkpath(dir)
+    p = joinpath(@__DIR__, repo_path)
+
+    run(`git clone "https://github.com/anandijain/sbml-test-suite" $(repo_path)`)
+end
+
+function get_sbml_suite_fns(repo_path = "$(datadir)/sbml-test-suite/")
+    p = joinpath(@__DIR__, repo_path)
+    semantic = "$(p)semantic/"
+    ds = filter(isdir, readdir(semantic; join=true))
     fns = reduce(vcat, glob.("*.xml", ds))
     fs = map(x -> splitdir(x)[end], fns)
-    dsts = normpath.(dir .* fs)
-    cp.(fns, dsts)
-    rm(repo_p; recursive=true)
-    readdir(dir; join=true)
+    fns
 end
 
-
+# "do it for me"
 export sbml_test_suite, biomodels
 
-export biomd_sbml_metadata, curl_sbml_zips, sbml_zip_urls
+export biomd_metadata, curl_biomd_zips, biomd_zip_urls, unzip_biomd
+export get_sbml_suite_fns
 
 end
