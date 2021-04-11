@@ -28,9 +28,8 @@ function biomd_metadata(meta_dir="$(datadir)/biomd_meta")
 end
 
 "uses the BioModels IDs and the download REST API"
-function biomd_zip_urls(df)
+function biomd_zip_urls(ids)
     base = "https://www.ebi.ac.uk/biomodels/search/download?models="
-    ids = df.id
     N = 100 # api limits 100 at a time
     chunks = [ids[i:i + 99] for i in 1:100:2200]
     append!(chunks, [ids[2201:end]])
