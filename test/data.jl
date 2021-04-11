@@ -33,6 +33,6 @@ for fn in suite_fns
         push!(bad, fn => e)
     end
 end
-@show good
-@show "-------"
+# @show good
+# @show "-------"
 @show bad
