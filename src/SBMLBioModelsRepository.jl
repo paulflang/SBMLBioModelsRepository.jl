@@ -18,6 +18,7 @@ end
 function jsonfn_to_df(fn)
     json = read(fn, String);
     json = JSON3.read(json)
+    @show json
     DataFrame(jsontable(json.models))
 end
 
