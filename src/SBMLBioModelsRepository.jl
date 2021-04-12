@@ -4,26 +4,29 @@ module SBMLBioModelsRepository
 const datadir = joinpath(@__DIR__, "../data")
 
 using CSV, DataFrames, JSON3, JSONTables, Glob
-using Base.Threads
+using Base.Threads, Downloads
 
 function curl_biomd_metadata(meta_dir="$(datadir)/biomd_meta")
     !ispath(meta_dir) && mkpath(meta_dir)
     offsets = 0:100:2200
     urls = "https://www.ebi.ac.uk/biomodels/search?query=sbml&offset=" .* string.(offsets) .* "&numResults=100&format=json"
     @sync Threads.@threads for i in 1:length(urls) 
-        run(`curl $(urls[i]) -o "$(meta_dir)/sbml_$(i).json"`)
+        Downloads.download(urls[i], "$(meta_dir)/sbml_$(i).json")
+        # run(`curl $(urls[i]) -o "$(meta_dir)/sbml_$(i).json"`)
     end
 end
 
 function jsonfn_to_df(fn)
     json = read(fn, String);
     json = JSON3.read(json)
-    DataFrame(jsontable(json.models))
+    @show propertynames(json)
+    haskey(json, :models) ? DataFrame(jsontable(json.models)) : missing
 end
 
 function biomd_metadata(meta_dir="$(datadir)/biomd_meta")
     fns = readdir(meta_dir; join=true)
-    dfs = jsonfn_to_df.(fns)
+    @show fns
+    dfs = filter(!ismissing, jsonfn_to_df.(fns))
     vcat(dfs...)
 end
 
@@ -108,7 +111,7 @@ end
     # "do it for me"
 export sbml_test_suite, biomodels
 
-export biomd_metadata, curl_biomd_zips, biomd_zip_urls, unzip_biomd
+export curl_biomd_metadata, biomd_metadata, curl_biomd_zips, biomd_zip_urls, unzip_biomd
 export get_sbml_suite_fns
 
 end
