@@ -54,7 +54,7 @@ function unzip_biomd(zips_dir, unzip_dir)
     mkpath(unzip_dir)
     zips = readdir(zips_dir; join=true)
     for fn in zips
-        run(`unzip  $fn -d $(unzip_dir)`) 
+        run(`unzip $fn -d $(unzip_dir)`) 
     end
     unzip_dir
 end
@@ -64,7 +64,9 @@ function biomodels(
     meta_dir="$(datadir)/biomd_meta",
     zips_dir="$(datadir)/biomd_zips/",
     unzip_dir="$(datadir)/biomd/";
-    curl_meta=false)
+    curl_meta=false,
+    limit=nothing # still gets all the metadata, just limits for curling zips
+    )
 
     mkpath.([meta_dir,
         zips_dir,
@@ -73,7 +75,7 @@ function biomodels(
     curl_meta && curl_biomd_metadata(meta_dir)
     df = biomd_metadata(meta_dir)
     CSV.write("data/sbml_biomodels.csv", df)
-    urls = biomd_zip_urls(df)
+    urls = limit === nothing ? biomd_zip_urls(df.id) : biomd_zip_urls(df.id[1:limit])
     curl_biomd_zips(urls, zips_dir)
     unzip_biomd(zips_dir, unzip_dir)
 end
@@ -87,14 +89,14 @@ for a particular version just do
 
     `filter(x->occursin("l1v2", x), fns)`
 """
-function sbml_test_suite(repo_path = "$(datadir)/sbml-test-suite/")
+function sbml_test_suite(repo_path="$(datadir)/sbml-test-suite/")
     # !ispath(dir) && mkpath(dir)
     p = joinpath(@__DIR__, repo_path)
 
     run(`git clone "https://github.com/anandijain/sbml-test-suite" $(repo_path)`)
 end
 
-function get_sbml_suite_fns(repo_path = "$(datadir)/sbml-test-suite/")
+function get_sbml_suite_fns(repo_path="$(datadir)/sbml-test-suite/")
     p = joinpath(@__DIR__, repo_path)
     semantic = "$(p)semantic/"
     ds = filter(isdir, readdir(semantic; join=true))
@@ -103,7 +105,7 @@ function get_sbml_suite_fns(repo_path = "$(datadir)/sbml-test-suite/")
     fns
 end
 
-# "do it for me"
+    # "do it for me"
 export sbml_test_suite, biomodels
 
 export biomd_metadata, curl_biomd_zips, biomd_zip_urls, unzip_biomd
