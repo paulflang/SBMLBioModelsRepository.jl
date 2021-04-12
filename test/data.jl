@@ -7,7 +7,7 @@ biomd_dir = joinpath(datadir, "biomd/")
 
 # test we get all biomodels sbml files
 # biomodels(;limit=200)
-biomodels()
+biomodels(;curl_meta=true)
 @test ispath(datadir)
 
 biomd_fns = readdir(biomd_dir)
