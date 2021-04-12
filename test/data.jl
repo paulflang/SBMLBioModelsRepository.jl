@@ -6,7 +6,8 @@ datadir = joinpath(@__DIR__, "../data/")
 biomd_dir = joinpath(datadir, "biomd/")
 
 # test we get all biomodels sbml files
-biomodels(;limit=200)
+# biomodels(;limit=200)
+biomodels()
 @test ispath(datadir)
 
 biomd_fns = readdir(biomd_dir)
