@@ -18,7 +18,6 @@ end
 function jsonfn_to_df(fn)
     json = read(fn, String);
     json = JSON3.read(json)
-    @show json
     DataFrame(jsontable(json.models))
 end
 
@@ -75,7 +74,7 @@ function biomodels(
         
     curl_meta && curl_biomd_metadata(meta_dir)
     df = biomd_metadata(meta_dir)
-    CSV.write("data/sbml_biomodels.csv", df)
+    CSV.write("$(datadir)sbml_biomodels.csv", df)
     urls = limit === nothing ? biomd_zip_urls(df.id) : biomd_zip_urls(df.id[1:limit])
     curl_biomd_zips(urls, zips_dir)
     unzip_biomd(zips_dir, unzip_dir)
