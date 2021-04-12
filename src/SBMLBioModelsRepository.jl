@@ -4,7 +4,7 @@ module SBMLBioModelsRepository
 const datadir = joinpath(@__DIR__, "../data")
 
 using CSV, DataFrames, JSON3, JSONTables, Glob
-using Base.Threads, Downloads
+using Base.Threads, Base.Iterators, Downloads
 
 function curl_biomd_metadata(meta_dir="$(datadir)/biomd_meta")
     !ispath(meta_dir) && mkpath(meta_dir)
@@ -34,8 +34,7 @@ end
 function biomd_zip_urls(ids)
     base = "https://www.ebi.ac.uk/biomodels/search/download?models="
     N = 100 # api limits 100 at a time
-    chunks = [ids[i:i + 99] for i in 1:100:2200]
-    append!(chunks, [ids[2201:end]])
+    chunks = Iterators.partition(ids, N)
     qs = join.(chunks, ",") 
     base .* qs  
 end
