@@ -12,8 +12,8 @@ function curl_biomd_metadata(meta_dir="$(datadir)/biomd_meta")
     urls = "https://www.ebi.ac.uk/biomodels/search?query=sbml&offset=" .* string.(offsets) .* "&numResults=100&format=json"
     # @sync Threads.@threads 
     for i in 1:length(urls) 
-        Downloads.download(urls[i], "$(meta_dir)/sbml_$(i).json")
-        # run(`curl $(urls[i]) -o "$(meta_dir)/sbml_$(i).json"`)
+        # Downloads.download(urls[i], "$(meta_dir)/sbml_$(i).json")
+        run(`curl $(urls[i]) -o "$(meta_dir)/sbml_$(i).json"`)
     end
 end
 
@@ -31,7 +31,8 @@ function curl_biomd_xmls(ids; verbose=false)
         verbose && @info("downloading $id")
         url = "$(base)$(id)?filename=$(id)_url.xml"
         fn = "$(datadir)/biomd/$(id).xml"
-        Downloads.download(url, fn)
+        # Downloads.download(url, fn)
+        run(`curl $(url) -o "$(fn)"`)
     end
 end
 
