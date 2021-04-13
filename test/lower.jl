@@ -28,11 +28,11 @@ good, bad = test_sbml(suite_fns)
 @time test_sbml(suite_fns)
 
 
-println("BIOMD DATASET TESTING")
-biomd_dir = joinpath(datadir, "biomd/")
-biomd_fns = readdir(biomd_dir; join=true)
-good, bad = test_sbml(suite_fns)
-@show bad
-@time test_sbml(suite_fns)
+# println("BIOMD DATASET TESTING")
+# biomd_dir = joinpath(datadir, "biomd/")
+# biomd_fns = readdir(biomd_dir; join=true)
+# good, bad = test_sbml(suite_fns)
+# @show bad
+# @time test_sbml(suite_fns)
 
 
