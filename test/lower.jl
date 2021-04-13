@@ -1,4 +1,7 @@
 using SBMLBioModelsRepository
+
+using Pkg
+Pkg.add(url="https://github.com/LCSB-BioCore/SBML.jl#master")
 using SBML
 
 function test_sbml(fns)
