@@ -21,14 +21,18 @@ end
 println("****SBML TEST SUITE TESTING****")
 suite_fns = get_sbml_suite_fns()
 good, bad = test_sbml(suite_fns)
-@test length(bad) == 1368 # regression test 
+@test length(bad) == 2 # regression test 
 @test sum(length.([good, bad])) == 9373
 
 @show bad
 @time test_sbml(suite_fns)
 
-# println("BIOMD DATASET TESTING")
-# biomd_dir = joinpath(datadir, "biomd/")
-# biomd_fns = readdir(biomd_dir; join=true)
-# good, bad = test_sbml(biomd_fns[1:20]);
-# @show bad
+
+println("BIOMD DATASET TESTING")
+biomd_dir = joinpath(datadir, "biomd/")
+biomd_fns = readdir(biomd_dir; join=true)
+good, bad = test_sbml(suite_fns)
+@show bad
+@time test_sbml(suite_fns)
+
+
