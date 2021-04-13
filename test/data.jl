@@ -6,7 +6,7 @@ datadir = joinpath(@__DIR__, "../data/")
 @show datadir
 
 # test we get all biomodels sbml files
-df = biomodels(;curl_meta=true, limit=200, verbose=false)
+df = biomodels(;curl_meta=true, verbose=false)
 
 biomd_dir = joinpath(datadir, "biomd/")
 @show biomd_dir
