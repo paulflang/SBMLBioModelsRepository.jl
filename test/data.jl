@@ -3,12 +3,14 @@ using CSV, DataFrames
 using Test
 
 datadir = joinpath(@__DIR__, "../data/")
-@test ispath(datadir)
+@show datadir
 
 # test we get all biomodels sbml files
 # biomodels(;limit=200)
 biomd_dir = joinpath(datadir, "biomd/")
 biomodels(;curl_meta=true, limit=20)
+
+@test ispath(datadir)
 @test ispath(biomd_dir)
 
 biomd_fns = readdir(biomd_dir; join=true)
