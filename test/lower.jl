@@ -21,6 +21,7 @@ good, bad = test_sbml(suite_fns)
 @test length(bad) == 1368 # regression test 
 @test sum(length.([good, bad])) == 9373
 
+@show bad
 @time test_sbml(suite_fns)
 
 # println("BIOMD DATASET TESTING")
