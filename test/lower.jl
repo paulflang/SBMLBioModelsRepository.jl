@@ -30,7 +30,8 @@ good, bad = test_sbml(suite_fns)
 println("BIOMD DATASET TESTING")
 biomd_dir = joinpath(datadir, "biomd/")
 biomd_fns = readdir(biomd_dir; join=true)
-good, bad = test_sbml(suite_fns)
+good, bad = test_sbml(biomd_fns)
+@test sum(length.([good, bad])) == 200
 @show bad
 @time test_sbml(biomd_fns)
 

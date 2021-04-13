@@ -10,8 +10,7 @@ function curl_biomd_metadata(meta_dir="$(datadir)/biomd_meta")
     !ispath(meta_dir) && mkpath(meta_dir)
     offsets = 0:100:2200
     urls = "https://www.ebi.ac.uk/biomodels/search?query=sbml&offset=" .* string.(offsets) .* "&numResults=100&format=json"
-    # @sync Threads.@threads 
-    for i in 1:length(urls) 
+    @sync Threads.@threads for i in 1:length(urls) 
         # Downloads.download(urls[i], "$(meta_dir)/sbml_$(i).json")
         run(`curl $(urls[i]) -o "$(meta_dir)/sbml_$(i).json"`)
     end
