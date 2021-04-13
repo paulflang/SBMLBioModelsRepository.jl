@@ -53,8 +53,9 @@ function biomodels(
         
     df = biomd_metadata(meta_dir; curl_meta=curl_meta)
     verbose && display(df)
-    CSV.write("$(datadir)sbml_biomodels.csv", df)
+    CSV.write("$(datadir)/sbml_biomodels.csv", df)
     limit === nothing ? curl_biomd_xmls(df.id; verbose=verbose) : curl_biomd_xmls(df.id[1:limit]; verbose=verbose)
+    df 
 end
 
 ###################################################
