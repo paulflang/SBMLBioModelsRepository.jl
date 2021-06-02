@@ -3,9 +3,18 @@ module SBMLBioModelsRepository
 
 const datadir = joinpath(@__DIR__, "../data")
 
+function __init__()
+    Pkg.add(url="https://github.com/paulflang/SBML.jl/", rev="pl/mk-species-units")
+end
+
 using CSV, DataFrames, JSON3, JSONTables, Glob
 using Base.Threads, Base.Iterators, Downloads
+using Pkg, Test
 
+using SBML
+using ModelingToolkit, OrdinaryDiffEq, CSV, DataFrames
+
+include("lower.jl")
 include("biomd.jl")
 include("suite.jl")
 
@@ -16,5 +25,6 @@ export curl_biomd_xmls
 export curl_biomd_metadata, biomd_metadata, curl_biomd_zips, biomd_zip_urls, unzip_biomd
 export get_sbml_suite_fns, jsonfn_to_df
 export datadir
+export goodbad, test_suite, lower_one, lower_fns
 
 end
