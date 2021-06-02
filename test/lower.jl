@@ -56,7 +56,8 @@ end
 
 function lower_fns(fns; write=true)
     df = DataFrame(file=String[], retcode=Int[], n_dvs=Int[], n_ps=Int[], error=String[])
-    @sync Threads.@threads for fn in fns 
+    # @sync Threads.@threads 
+    for fn in fns 
         lower_one(fn, df)
     end
     write && CSV.write("logs/test_suite.csv", df)
