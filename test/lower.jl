@@ -1,7 +1,7 @@
 using SBMLBioModelsRepository
 
 using Pkg, Test
-Pkg.develop(url="https://github.com/LCSB-BioCore/SBML.jl#paulflang:pl/mk-species-units")
+Pkg.add(url="https://github.com/LCSB-BioCore/SBML.jl#paulflang:pl/mk-species-units")
 using SBML
 using ModelingToolkit, OrdinaryDiffEq, CSV, DataFrames
 using Base.Threads
