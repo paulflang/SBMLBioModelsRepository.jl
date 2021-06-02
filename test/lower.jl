@@ -28,7 +28,7 @@ function test_suite(logdir=joinpath(@__DIR__, "logs"); write=false)
     (g, b) = goodbad(f, models)
 end
 
-function lower_one(fn, df)
+function lower_one(fn, df; verbose=false)
     k = 0
     n_dvs = 0
     n_ps = 0
@@ -45,11 +45,11 @@ function lower_one(fn, df)
         sol = solve(prob, TRBDF2(), dtmax=0.5)
         k = 4
     catch e
-        @info fn => e
+        verbose && @info fn => e
         err = string(e)
     finally
         push!(df, (fn, k, n_dvs, n_ps, err))
-        printstyled("$fn done with a code $k\n"; color=:green)
+        verbose && printstyled("$fn done with a code $k\n"; color=:green)
     end
 end
 
