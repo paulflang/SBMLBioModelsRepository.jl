@@ -18,7 +18,7 @@ println("BIOMD DATASET TESTING")
 biomd_dir = joinpath(datadir, "biomd/")
 @show biomd_dir
 @test ispath(biomd_dir)
-biomd_fns = readdir("data/biomd/"; join=true)
+biomd_fns = readdir(biomd_dir; join=true)
 (good, bad) = goodbad(f, biomd_fns)
 @show length(bad)
 biomd_df = lower_fns(biomd_fns; write_fn="biomd.csv")
