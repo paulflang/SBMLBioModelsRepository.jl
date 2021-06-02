@@ -8,6 +8,7 @@ for a particular version just do
     `filter(x->occursin("l1v2", x), fns)`
 """
 function sbml_test_suite(repo_path="$(datadir)/sbml-test-suite/")
+    isdir(repo_path) && return nothing
     run(`git clone "https://github.com/anandijain/sbml-test-suite" $(repo_path)`)
 end
 

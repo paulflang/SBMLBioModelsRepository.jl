@@ -1,8 +1,8 @@
 using SBMLBioModelsRepository
 
 using Pkg, Test
-Pkg.add(url="https://github.com/LCSB-BioCore/SBML.jl#paulflang:pl/mk-species-units")
-using SBML
+Pkg.add(url="https://github.com/paulflang/SBML.jl/", rev="pl/mk-species-units")
+using SBML  
 using ModelingToolkit, OrdinaryDiffEq, CSV, DataFrames
 using Base.Threads
 
@@ -22,11 +22,10 @@ end
 """
 naive tester to separate the ones that lower and those that dont
 """
-function test_suite(logdir=joinpath(@__DIR__, "logs"); write=false)
-    !isdir(logdir) && mkdir(logdir)
+function test_suite()
     models = semantic()
     f = x -> ODESystem(readSBML(x))
-    (g, b) = goodbad(f, models)
+    goodbad(f, models)
 end
 
 function lower_one(fn, df; verbose=false)
