@@ -39,6 +39,9 @@ function lower_one(fn, df; verbose=false)
     catch e
         verbose && @info fn => e
         err = string(e)
+        if length(err) > 1000 # cutoff since I got ArgumentError: row size (9088174) too large 
+            err = err[1:1000]
+        end
     finally
         push!(df, (fn, k, n_dvs, n_ps, err))
         verbose && printstyled("$fn done with a code $k\n"; color=:green)
