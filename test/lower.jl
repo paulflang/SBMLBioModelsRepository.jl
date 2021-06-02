@@ -5,6 +5,7 @@ Pkg.develop(url="https://github.com/LCSB-BioCore/SBML.jl#paulflang:pl/mk-species
 using SBML
 using ModelingToolkit, OrdinaryDiffEq, CSV, DataFrames
 using Base.Threads
+
 function goodbad(f, xs)
     good = []
     bad = []
@@ -69,6 +70,7 @@ fn = suite_fns[1]
 @test isfile(fn)
 @test readSBML(fn) isa SBML.Model
 (good, bad) = goodbad(f, suite_fns)
+@info bad[1]
 @test length(bad) == 646 # regression test 
 @test sum(length.([good, bad])) == 1664
 
