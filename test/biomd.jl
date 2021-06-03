@@ -1,3 +1,4 @@
+include("lower.jl")
 # get the dataset
 df = biomodels(;curl_meta=true, verbose=false)
 

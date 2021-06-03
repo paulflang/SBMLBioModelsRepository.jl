@@ -1,3 +1,4 @@
+include("lower.jl")
 sbml_test_suite()
 suite_fns = get_sbml_suite_fns()
 fn = suite_fns[1]
