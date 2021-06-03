@@ -6,13 +6,17 @@ function jsonfn_to_df(fn)
 end
 
 "curls the json files of all the "
-function curl_biomd_metadata(meta_dir="$(datadir)/biomd_meta")
+function curl_biomd_metadata(meta_dir="$(datadir)/biomd_ode_meta")
     !ispath(meta_dir) && mkpath(meta_dir)
     offsets = 0:100:2200
-    urls = "https://www.ebi.ac.uk/biomodels/search?query=sbml&offset=" .* string.(offsets) .* "&numResults=100&format=json"
-    @sync Threads.@threads for i in 1:length(urls) 
+    # "https://www.ebi.ac.uk/biomodels/search?query=&offset=0&numResults=10"
+    sbml_query = "sbml"
+    sbml_ode_query = "*%3A*%20AND%20modellingapproach%3A%22Ordinary%20differential%20equation%20model%22&domain=biomodels"
+    urls = .*("https://www.ebi.ac.uk/biomodels/search?query=", sbml_ode_query,"&offset=", string.(offsets), "&numResults=100&format=json")
+    # @sync for i in 1:length(urls) 
+    @sync for i in 1:10 
         # Downloads.download(urls[i], "$(meta_dir)/sbml_$(i).json")
-        run(`curl $(urls[i]) -o "$(meta_dir)/sbml_$(i).json"`)
+        @async run(`curl $(urls[i]) -o "$(meta_dir)/sbml_$(i).json"`)
     end
 end
 
@@ -98,3 +102,18 @@ end
 #     unzip_biomd(zips_dir, unzip_dir)
 # end
 
+function ab()
+    ids = df.id
+    ms = []
+    @sync for id in ids 
+        @async try 
+            m = readSBML("data/biomd/$id.xml")
+            push!(ms, id => m)
+        catch e
+            @info e
+        end
+    end
+    @show length(ms)
+    df[first.(ms) .== df.id, :]
+    filter(x -> x.id ∈ good, df)
+end

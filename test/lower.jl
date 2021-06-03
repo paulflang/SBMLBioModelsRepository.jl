@@ -1,37 +1,59 @@
-using SBMLBioModelsRepository
-
-using Pkg
-Pkg.add(url="https://github.com/LCSB-BioCore/SBML.jl#master")
-using SBML
-
-function test_sbml(fns)
+function goodbad(f, xs)
     good = []
     bad = []
-    for fn in fns
-        try 
-            m = readSBML(fn)
-            push!(good, fn => m)
+    for x in xs
+        try
+            push!(good, x => f(x))
         catch e
-            push!(bad, fn => e)
+            push!(bad, x => e)
         end
     end
-    good, bad
+    (good, bad)
 end
 
-println("****SBML TEST SUITE TESTING****")
-suite_fns = get_sbml_suite_fns()
-good, bad = test_sbml(suite_fns)
-@test length(bad) == 2 # regression test 
-@test sum(length.([good, bad])) == 9373
+"""
+naive tester to separate the ones that lower and those that dont
+"""
+function test_suite()
+    models = semantic()
+    f = x -> ODESystem(readSBML(x))
+    goodbad(f, models)
+end
 
-@show bad
-@time test_sbml(suite_fns)
+function lower_one(fn, df; verbose=false)
+    k = 0
+    n_dvs = 0
+    n_ps = 0
+    err = ""
+    try
+        ml = readSBML(fn)
+        k = 1
+        sys = ODESystem(ml)
+        n_dvs = length(states(sys))
+        n_ps = length(parameters(sys))
+        k = 2
+        prob  = ODEProblem(ml, (0, 1000.0))
+        k = 3
+        sol = solve(prob, TRBDF2(), dtmax=0.5; force_dtmin=true, unstable_check=unstable_check = (dt,u,p,t) -> any(isnan, u))
+        k = 4
+    catch e
+        verbose && @info fn => e
+        err = string(e)
+        if length(err) > 1000 # cutoff since I got ArgumentError: row size (9088174) too large 
+            err = err[1:1000]
+        end
+    finally
+        push!(df, (fn, k, n_dvs, n_ps, err))
+        verbose && printstyled("$fn done with a code $k\n"; color=:green)
+    end
+end
 
-println("BIOMD DATASET TESTING")
-biomd_dir = joinpath(datadir, "biomd/")
-biomd_fns = readdir(biomd_dir; join=true)
-good, bad = test_sbml(biomd_fns)
-@test sum(length.([good, bad])) == 200
-@show length(bad)
-@show bad
-@time test_sbml(biomd_fns)
+function lower_fns(fns; write_fn=nothing)
+    df = DataFrame(file=String[], retcode=Int[], n_dvs=Int[], n_ps=Int[], error=String[])
+    # @sync Threads.@threads 
+    for fn in fns 
+        lower_one(fn, df)
+    end
+    write_fn !== nothing && CSV.write("logs/$(write_fn)", df)
+    df
+end
