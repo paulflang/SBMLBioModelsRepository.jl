@@ -4,12 +4,12 @@ module SBMLBioModelsRepository
 const datadir = joinpath(@__DIR__, "../data")
 
 function __init__()
+    using Pkg
     Pkg.add(url="https://github.com/paulflang/SBML.jl/", rev="pl/mk-species-units")
 end
 
 using CSV, DataFrames, JSON3, JSONTables, Glob
 using Base.Threads, Base.Iterators, Downloads
-using Pkg
 
 using SBML
 using ModelingToolkit, OrdinaryDiffEq, CSV, DataFrames
