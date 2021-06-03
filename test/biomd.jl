@@ -19,6 +19,9 @@ biomd_dir = joinpath(datadir, "biomd/")
 @show biomd_dir
 @test ispath(biomd_dir)
 biomd_fns = readdir(biomd_dir; join=true)
-(good, bad) = goodbad(x->ODESystem(readSBML(x)), biomd_fns)
-@show length(bad)
-biomd_df = lower_fns(biomd_fns; write_fn="biomd.csv")
+fn = biomd_fns[1]
+@test length(biomd_fns) == 981
+@test readSBML(fn) isa SBML.Model
+(good, bad) = goodbad(x->ODESystem(readSBML(x)), biomd_fns[1:100])
+@info length(good), length(bad)
+biomd_df = lower_fns(biomd_fns; write_fn="biomd_odes_lowered.csv")

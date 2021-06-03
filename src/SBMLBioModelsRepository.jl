@@ -9,7 +9,7 @@ end
 
 using CSV, DataFrames, JSON3, JSONTables, Glob
 using Base.Threads, Base.Iterators, Downloads
-using Pkg, Test
+using Pkg
 
 using SBML
 using ModelingToolkit, OrdinaryDiffEq, CSV, DataFrames
